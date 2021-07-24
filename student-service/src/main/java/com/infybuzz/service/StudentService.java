@@ -11,6 +11,8 @@ import com.infybuzz.request.CreateStudentRequest;
 import com.infybuzz.response.AddressResponse;
 import com.infybuzz.response.StudentResponse;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import jdk.internal.org.jline.utils.Log;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -24,6 +26,9 @@ public class StudentService {
 	
 	@Autowired
 	AddressFeignClient addressFeignClient;
+	
+	@Autowired
+	CommonService commonService;
 
 	public StudentResponse createStudent(CreateStudentRequest createStudentRequest) {
 
@@ -48,10 +53,21 @@ public class StudentService {
 		StudentResponse studentResponse = new StudentResponse(student);
 		
 //		studentResponse.setAddressResponse(getAddressById(student.getAddressId()));
-		studentResponse.setAddressResponse(addressFeignClient.getById(student.getAddressId()));
+		studentResponse.setAddressResponse(commonService.getAddressById(student.getAddressId()));
 		
 		return studentResponse;
 	}
+	
+//	@CircuitBreaker(name = "addressService", fallbackMethod = "fallbackGetAddressById")
+//	public AddressResponse getAddressById (long addressId) {
+//		return addressFeignClient.getById(addressId);
+//	}
+//	
+//	public AddressResponse fallbackGetAddressById(long addressId) {
+//		 
+//		return new AddressResponse();
+//		
+//	}
 	
 //	public AddressResponse getAddressById (long addressId) {
 //		Mono<AddressResponse> addressResponse = 
